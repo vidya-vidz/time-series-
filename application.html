@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<h2>UNEMPLOYMENT RATES OF UNITED STATES OF AMERICA</h2>
+<style>
+
+
+.graphid path {
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.y.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush .extent {
+  stroke: #FFF;
+  shape-rendering: crispEdges;
+}
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+#states {
+//  fill: #aaa;
+stroke: #333;
+}
+
+#states .active {
+  fill: orange;
+}
+
+#state-borders {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.states-choropleth {
+  fill: #ccc;
+}
+#tooltip-container {
+  position: absolute;
+  background-color: #fff;
+  color: #000;
+  padding: 10px;
+  border: 1px solid;
+  display: none;
+}
+.tooltip_key {
+  font-weight: bold;
+}
+
+.line {
+
+  fill: none;
+}
+
+.line1
+{
+  fill:none;
+}
+
+.button {
+  padding: 5px 5px 5px 25px;
+  border: 1px solid #666;
+  color:#000;
+  text-decoration:none;
+  background: #dcdcdc url(icon.png) no-repeat scroll 5px center;
+}
+
+
+
+</style>
+<body>
+rise in %<input type='text' name='rise' id='rise' placeholder='00.00'><button onClick=risefunc()>rise</button><br></br>
+drop in %<input type='text' name='drop' id='drop' placeholder='00.00'><button onClick=dropfunc()>Drop</button><br>
+<input type='checkbox' name='national' value='national' onchange=nationalunemp(this)> National Unemployment Rate<br>
+<input type='checkbox' name='select All' value='select' onchange=allstates(this)> Select All</input>
+<div id="tooltip-container"></div>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script>
+
+var width = 760,
+    height = 400,
+    centered;
+
+var projection = d3.geo.albersUsa()
+    .scale(670)
+    .translate([width / 2, height / 2]);
+
+var path = d3.geo.path()
+    .projection(projection);
+
+var svg1 = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+    svg1.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    .on("click", clicked);
+
+
+var selarr=[];
+
+var margin = {top: 30, right: 10, bottom: 100, left: 40},
+margin2 = { top: 430, right: 10, bottom: 20, left: 40 },
+    width =1350 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+    height2 = 500 - margin2.top - margin2.bottom;
+
+var parseDate = d3.time.format("%d-%b-%y").parse;
+var parseDate2 = d3.time.format("%B-%Y").parse;
+var parseDate3 = d3.time.format("%Y").parse;
+
+var x = d3.time.scale().range([0, width]),
+    x2 = d3.time.scale().range([0, width]);
+
+var y = d3.scale.linear().range([height, 0]),
+    y2 = d3.scale.linear().range([height2, 0]);
+var y0 = d3.scale.linear().range([height, 0]);
+var y1 = d3.scale.linear().range([height, 0]);
+
+var brush = d3.svg.brush()//for slider bar at the bottom
+    .x(x2) 
+    .on("brush", brush);
+
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(15);
+
+  var xAxis2 = d3.svg.axis().scale(x2) // xAxis for brush slider
+    .orient("bottom").ticks(15);
+
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(15);
+
+
+
+
+
+var valueline = d3.svg.line()
+     .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.unemplyment);});
+
+var valueline2 = d3.svg.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.unemplyment); }); 
+    
+
+     
+
+var svg = d3.select("body")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+   
+        
+//append clip path for lines plotted, hiding those part out of bound
+svg.append("defs")
+  .append("clipPath") 
+    .attr("x",40)
+    .attr("id", "clip")
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
+    var high = svg.append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      
+      var event = svg.append("g")
+  .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+          
+  var color1=d3.scale.ordinal().range(["#DC143C",  "#FF0000",  "#8B0000", "#FFB6C1", "#FF1493", "#FF6347", "#FF8C00", "#BDB76B", "#EE82EE", "#BA55D3", "#800080", "#4B0082", "#66CDAA", "#008080", "#00FFFF", "#4682B4", "#7B68EE", "#98FB98", "#32CD32", "#9ACD32", "#0000FF", "#6495ED", "#DEB887", "#A52A2A", "#C0C0C0", "#708090", "#FFF5EE", "#E2705C", "#E37756", "#E38457", "#E39158", "#E29D58", "#E2AA59", "#E0B15B", "#DFB95C", "#DDC05E", "#DBC75F", "#E3CF6D", "#EAD67C", "#F2DE8A","#BDB76B","#663399","#FF0000","#EE82EE","#FFFF00","#FFC0CB","#FFA07A","#FF69B4","#008080","#00FFFF","#FF4500","#000080","#FF00FF","#BA55D3","#6495ED","#BA55D3"]);
+//get the data
+var dataAll={};
+
+
+
+d3.csv("unemplyment.csv", function(error, data) {    
+  data.forEach(function(d) {
+  if(dataAll[d.State]==undefined)
+  dataAll[d.State]=[];
+  dataAll[d.State].push(d);
+  });
+  
+  for(var statename in dataAll) {
+  dataAll[statename].forEach(function(d) {
+    d.date = parseDate2(d.Month+"-"+d.Year);
+    d.unemplyment = d["unemplyment"];
+    
+  }); 
+  
+  dataAll[statename].sort(function(a,b){
+    if (a.date<b.date)
+        return -1;
+    else if (a.date>b.date)
+        return 1;
+    else
+        return 0;
+  });
+  
+}
+
+x.domain(d3.extent(dataAll["Indiana"], function(d) { return d.date; }));
+    y.domain([0, 20]);
+    x2.domain(x.domain());
+    y2.domain(y.domain());
+
+ high.selectAll(".line")
+        .data(dataAll)
+      .enter()
+      .append("g")
+      .append("path")
+        .attr("class","line")
+        .attr("stroke-width", 2)
+        .attr("fill","none")
+        .attr("d", function(d) { return valueline(d); })
+        .style("stroke", function(d) {return color1(d[0].State);})
+        .attr("clip-path", "url(#clip)");
+
+
+
+    high.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+ 
+    high.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+
+
+ event.selectAll(".line")
+        .data(dataAll)
+      .enter().append("g")
+    .append("path")
+        .attr("class", "line")
+         .attr("clip-path", "url(#clip)")
+        .attr("fill","none")
+        .attr("stroke-width",1)
+        .attr("d", function(d) { return valueline2(d); })
+        .attr("stroke", function(d) {return color1(d[0].State);})
+        .attr("clip-path", "url(#clip)");
+
+   event.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height2 + ")")
+        .call(xAxis2);
+ 
+    event.append("g")
+        .attr("class", "x brush")
+        .call(brush)
+      .selectAll("rect")
+        .attr("y", -6)
+        .attr("height", height2 + 7);
+        
+
+});
+
+function brush() {
+  x.domain(brush.empty() ? x2.domain() : brush.extent());
+  svg.selectAll(".line").attr("d",  function(d) {return valueline(d)});
+  focus.select(".x.axis").call(xAxis);
+  focus.select(".y.axis").call(yAxis);
+  svg.select(".national").attr("d",valueline(dataUnemp));
+
+}    
+  
+ 
+//----------------map code---------------------------------
+var mapg = svg1.append("g");
+d3.tsv("https://s3-us-west-2.amazonaws.com/vida-public/geo/us-state-names.tsv", function(error, names) {
+  
+  name_id_map = {};
+  id_name_map = {};
+  
+  for (var i = 0; i < names.length; i++) {
+    name_id_map[names[i].name] = names[i].id;
+    id_name_map[names[i].id] = names[i].name;
+  }
+  
+  
+  });
+
+
+d3.json("usstates.json", function(error, us) {
+  if (error) throw error;
+ var valueById = d3.map();
+  mapg.append("g")
+  .attr("class", "states-choropleth")
+      .attr("id", "states")
+    .selectAll("path")
+      .data(us.features)
+    .enter().append("path")
+      .attr("d", path)
+    .attr("test",function(d){
+    console.log(d);
+   // debugger;
+    })
+      .on("click", clicked)
+    .on("mousemove", function(d) {
+            var html = "";
+  
+            html += "<div class=\"tooltip_kv\">";
+            html += "<span class=\"tooltip_key\">";
+             html += d.properties.name;
+            html += "</span>";
+
+            html += "</div>";
+            
+            $("#tooltip-container").html(html);
+            $(this).attr("fill-opacity", "0.8");
+            $("#tooltip-container").show();
+            
+            var coordinates = d3.mouse(this);
+            
+            var map_width = $('.states-choropleth')[0].getBoundingClientRect().width;
+            
+            if (d3.event.layerX < map_width / 2) {
+              d3.select("#tooltip-container")
+                .style("top", (d3.event.layerY + 15) + "px")
+                .style("left", (d3.event.layerX + 15) + "px");
+            } else {
+              var tooltip_width = $("#tooltip-container").width();
+              d3.select("#tooltip-container")
+                .style("top", (d3.event.layerY + 15) + "px")
+                .style("left", (d3.event.layerX - tooltip_width - 30) + "px");
+            }
+        })
+        .on("mouseout", function() {
+                $(this).attr("fill-opacity", "1.0");
+                $("#tooltip-container").hide();
+            })
+      .attr("fill", function (d) {
+      return color1(d.properties.name);
+      });
+    
+
+  mapg.append("path")
+      .datum(topojson.mesh(us, us.features, function(a, b) { return a !== b; }))
+      .attr("id", "state-borders")
+      .attr("d", path);
+    
+});
+//--------on click function-------
+
+function clicked(d) {
+  var x, y, k;
+  
+
+  if (d && centered !== d) {
+    var centroid = path.centroid(d);
+    x = centroid[0];
+    y = centroid[1];
+    k = 4;
+    centered = d;
+  } else {
+    x = width / 2;
+    y = height / 2;
+    k = 1;
+    centered = null;
+  }
+
+  mapg.selectAll("path")
+      .classed("active", centered && function(d) { return d === centered; });
+
+  mapg.transition()
+      .duration(750)
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+      .style("stroke-width", 1.5 / k + "px");
+      debugger;
+    
+//integration trial
+   selarr.push(d.properties.name);
+   debugger;
+   graph();
+    
+}
+
+/*---------------------------start national unemployment --------------------------------*/
+var dataUnemp=[];
+function nationalunemp(element) {
+if(element.checked)
+{
+//alert("checked");
+  d3.csv("nationalunemp.csv", function(error, data) {    
+    
+
+    // Scale the range of the data
+      x.domain(d3.extent(dataAll["Indiana"], function(d) { return d.date; }));
+      y.domain([0, 25]); 
+      y1.domain([0, 25]);
+  dataUnemp=data;
+    
+    
+    dataUnemp.forEach(function(d) {
+     // d.date = parseDate3(d.year);
+      d.date = parseDate2(d.month+"-"+d.year);
+      d.unemplyment = +d["value"];
+      
+    });
+
+    
+    dataUnemp.sort(function(a,b){
+      if (a.date<b.date)
+          return -1;
+      else if (a.date>b.date)
+          return 1;
+      else
+          return 0;
+    });
+  
+
+svg.append("path")        // Add the valueline path.
+        .attr("class", "national")
+    .attr("stroke-width", 2)
+   .attr("stroke", "red")
+   .attr("fill","none")
+    .attr("d", valueline(dataUnemp))
+    
+    
+ svg .append("path")        // Add the valueline path.
+        .attr("class", "line1")
+         .attr("clip-path", "url(#clip)")
+    .attr("stroke-width", 7)
+    .attr("stroke-opacity", 0)
+	.attr("d", valueline(dataUnemp))
+    .on("mouseover", function(d1) {
+    svg.selectAll(".line")
+.transition().duration(250)
+    .attr("stroke-opacity", function(d2) {
+    if(d1==d2)
+    return 1;
+    else
+    return 0.01;
+    });
+    })
+    .on("mouseout", function(d) {
+    svg.selectAll(".line")
+    .transition().duration(250)
+    .attr("stroke-opacity", 1);
+    });
+
+
+});
+
+high.selectAll(".line")
+        .data(dataAll)
+      .enter()
+      .append("g")
+      .append("path")
+        .attr("class","line")
+         .attr("clip-path", "url(#clip)")
+        .attr("stroke-width", 2)
+        .attr("fill","none")
+        .attr("d", function(d) { return valueline(d); })
+        .style("stroke", function(d) {return color1(d[0].State);})
+        .attr("clip-path", "url(#clip)");
+
+
+
+
+
+
+}
+
+}
+/*------------------ end national unemployment ---------------------*/
+//-------all states-----------
+function allstates(element)
+{
+  if(element.checked)
+  {
+   
+    var selarr1=["Alabama","Alaska","","Arizona","Arkansas","California","","Colorado","Connecticut","Delaware","","Florida","Georgia","","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts"
+,"Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma"
+,"Oregon","Pennsylvania","","","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia",,"Washington","West Virginia","Wisconsin","Wyoming"];
+for(var i=0; i<selarr1.length;i++)
+{
+selarr[i]=selarr1[i];
+graph();
+}
+
+
+ }
+}
+
+graph();
+var dataArray=[];
+
+function graph() {
+
+d3.csv("unemplyment.csv", function(error, data) {    
+  
+    x.domain(d3.extent(dataAll["Indiana"], function(d) { return d.date; }));
+    y.domain([0, 25]);
+    
+  
+   for(var statename in dataAll) {
+  for(var i=0;i<selarr.length;i++) {
+  if(statename==selarr[i]) {
+  // check if statename is in selarr
+  dataArray.push(dataAll[statename]);
+  }
+  }
+  }
+  
+  for(var statename in dataArray) {
+  dataArray[statename].forEach(function(d) {
+    d.date = parseDate2(d.Month+"-"+d.Year);
+    d.unemplyment = +d["unemplyment"];
+    
+  }); 
+  
+  dataArray[statename].sort(function(a,b){
+    if (a.date<b.date)
+        return -1;
+    else if (a.date>b.date)
+        return 1;
+    else
+        return 0;
+  });
+  
+}
+  
+   svg.selectAll(".line")
+  .data(dataArray).enter()
+  .append("path") 
+      // Add the valueline path.
+    .attr("class", "line")
+    .attr("stroke-width", 2)
+    .attr("class","line")
+     .attr("clip-path", "url(#clip)")
+    .attr("stroke", function(d) {
+    return color1(d[0].State);
+    })
+    .attr("d", function (d) {
+    return valueline(d)
+    })
+    .on("mouseover", function(d1) {
+    svg.selectAll(".line")
+    .transition().duration(250)
+    .attr("stroke-opacity", function(d2) {
+    if(d1==d2)
+    return 1;
+    else
+    return 0.01;
+    });
+    })
+    .on("mouseout", function(d) {
+    svg.selectAll(".line")
+    .transition().duration(250)
+    .attr("stroke-opacity", 1);
+    });
+
+
+    svg.selectAll(".line1")
+  .data(dataArray).enter()
+  .append("path")        // Add the valueline path.
+        .attr("class", "line1")
+         .attr("clip-path", "url(#clip)")
+    .attr("stroke-width", 7)
+    .attr("stroke-opacity", 0)
+    .attr("stroke", function(d) {
+    return color1(d[0].State);
+    })
+    .attr("d", function (d) {
+    return valueline(d)
+    })
+    .on("mouseover", function(d1) {
+    svg.selectAll(".line")
+    .transition().duration(250)
+    .attr("stroke-opacity", function(d2) {
+    if(d1==d2)
+    return 1;
+    else
+    return 0.01;
+    });
+    })
+    .on("mouseout", function(d) {
+    svg.selectAll(".line")
+    .transition().duration(250)
+    .attr("stroke-opacity", 1);
+    });
+  
+
+  svg.selectAll(".line").append("title")
+  .text(function(d) {
+  return d[0].State;
+  });
+  
+  svg.selectAll(".line1").append("title")
+  .text(function(d) {
+  return d[0].State;
+  });
+  
+});
+
+}
+svg.selectAll(".y axis text")  // select all the text elements for the xaxis
+          .attr("transform", function(d) {
+             
+             return "translate(" + this.getBBox().height*-6 + "," + this.getBBox().height + ")";
+         });
+
+//------appending the text-------
+svg.append("text")
+            .attr("text-anchor", "margin-right")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "rotate(-90)")
+            .attr("y", 45)
+            .attr("x", -180)
+      .attr("dy", "0.71em")
+      .attr("fill", "#000")
+              // text is drawn off the screen top left, move down and out and rotate
+            .text("Unemployment Rate(%)");
+
+//-------rise and drop functions------
+function risefunc() {
+var rise=document.getElementById('riseper').value;
+rise=Number(rise);
+high.selectAll(".line")
+.attr("stroke-opacity", function (unRates) {
+var bigIncrease=false;
+for(var i=1; i<unRates.length; i++) {
+  if(unRates[i].unemplyment-unRates[i-1].unemplyment>rise)
+  bigIncrease=true;
+}
+if(bigIncrease) {
+return 1;
+}
+else {
+return 0.1;
+}
+});
+}
+
+function dropfunc() {
+var drop=document.getElementById('dropper').value;
+drop=Number(drop);
+high.selectAll(".line")
+.attr("stroke-opacity", function (unRates) {
+var bigDrop=false;
+for(var i=1; i<unRates.length; i++) {
+  if(unRates[i-1].unemplyment-unRates[i].unemplyment>drop)
+  bigDrop=true;
+}
+if(bigDrop) {
+return 1;
+}
+else {
+return 0.1;
+}
+});
+}
+
+</script>
