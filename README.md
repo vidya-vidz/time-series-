@@ -47,3 +47,6 @@ SCREEN SHOTS
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/slider%20for%20national.png
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/slider%20for%20states.png
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/tooltip%20for%20graph.png
+
+video for project
+https://github.com/vidya-vidz/time-series-/blob/master/recording.webm
