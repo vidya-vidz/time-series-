@@ -37,15 +37,23 @@ Operating system: windows 7/8/10
 
 
 SCREEN SHOTS
-
+The function of drop down is been showed in this screen shot. the drop down of unemployment rate by 2%
 [![ScreenShot] https://github.com/vidya-vidz/time-series-/blob/master/drop.png
+selection of multiple states to compare the unemployment rate
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/multiple%20state.png
+select all the states for all the states unemployment rate
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/my%20project.png
+national unemployment rate
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/national.png
+tooltip for state names and zoom function working
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/one%20state%20with%20tool%20tip.png
+rise of unemployment rate
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/rise.png
+national unemployment rate month wise
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/slider%20for%20national.png
+month wise state unemployment rate
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/slider%20for%20states.png
+tooltip for graph on mouse over the graph
 [![ScreenShot]https://github.com/vidya-vidz/time-series-/blob/master/tooltip%20for%20graph.png
 
 video for project
