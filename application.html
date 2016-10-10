@@ -38,7 +38,7 @@ stroke: #333;
 }
 
 #states .active {
-  fill: orange;
+  fill: blue;
 }
 
 #state-borders {
@@ -87,8 +87,8 @@ stroke: #333;
 </style>
 <body>
 rise in %<input type='text' name='rise' id='rise' placeholder='00.00'><button onClick=risefunc()>rise</button><br></br>
-drop in %<input type='text' name='drop' id='drop' placeholder='00.00'><button onClick=dropfunc()>Drop</button><br>
-<input type='checkbox' name='national' value='national' onchange=nationalunemp(this)> National Unemployment Rate<br>
+drop in %<input type='text' name='drop' id='drop' placeholder='00.00'><button onClick=dropfunc()>Drop</button><br></br>
+<input type='checkbox' name='national' value='national' onchange=nationalunemp(this)> National Unemployment Rate
 <input type='checkbox' name='select All' value='select' onchange=allstates(this)> Select All</input>
 <div id="tooltip-container"></div>
 <script src="https://d3js.org/d3.v3.min.js"></script>
@@ -175,16 +175,16 @@ var svg = d3.select("body")
 //append clip path for lines plotted, hiding those part out of bound
 svg.append("defs")
   .append("clipPath") 
-    .attr("x",40)
-    .attr("id", "clip")
+   .attr("id", "clip")
     .append("rect")
+    .attr("x",40)
     .attr("width", width)
     .attr("height", height);
 
     var high = svg.append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
       
-      var event = svg.append("g")
+      var event1 = svg.append("g")
   .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
           
@@ -249,24 +249,24 @@ x.domain(d3.extent(dataAll["Indiana"], function(d) { return d.date; }));
 
 
 
- event.selectAll(".line")
+ event1.selectAll(".line")
         .data(dataAll)
       .enter().append("g")
     .append("path")
         .attr("class", "line")
-         .attr("clip-path", "url(#clip)")
+        // .attr("clip-path", "url(#clip)")
         .attr("fill","none")
         .attr("stroke-width",1)
         .attr("d", function(d) { return valueline2(d); })
         .attr("stroke", function(d) {return color1(d[0].State);})
         .attr("clip-path", "url(#clip)");
 
-   event.append("g")
+   event1.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height2 + ")")
         .call(xAxis2);
  
-    event.append("g")
+    event1.append("g")
         .attr("class", "x brush")
         .call(brush)
       .selectAll("rect")
@@ -279,8 +279,8 @@ x.domain(d3.extent(dataAll["Indiana"], function(d) { return d.date; }));
 function brush() {
   x.domain(brush.empty() ? x2.domain() : brush.extent());
   svg.selectAll(".line").attr("d",  function(d) {return valueline(d)});
-  focus.select(".x.axis").call(xAxis);
-  focus.select(".y.axis").call(yAxis);
+  high.select(".x.axis").call(xAxis);
+  high.select(".y.axis").call(yAxis);
   svg.select(".national").attr("d",valueline(dataUnemp));
 
 }    
@@ -433,14 +433,15 @@ if(element.checked)
 svg.append("path")        // Add the valueline path.
         .attr("class", "national")
     .attr("stroke-width", 2)
-   .attr("stroke", "red")
+.attr("stroke", "red")
+.attr("clip-path","url(#clip)")
    .attr("fill","none")
     .attr("d", valueline(dataUnemp))
     
     
  svg .append("path")        // Add the valueline path.
         .attr("class", "line1")
-         .attr("clip-path", "url(#clip)")
+        // .attr("clip-path", "url(#clip)")
     .attr("stroke-width", 7)
     .attr("stroke-opacity", 0)
 	.attr("d", valueline(dataUnemp))
@@ -461,7 +462,7 @@ svg.append("path")        // Add the valueline path.
     });
 
 
-});
+
 
 high.selectAll(".line")
         .data(dataAll)
@@ -469,16 +470,47 @@ high.selectAll(".line")
       .append("g")
       .append("path")
         .attr("class","line")
-         .attr("clip-path", "url(#clip)")
+         //.attr("clip-path", "url(#clip)")
         .attr("stroke-width", 2)
         .attr("fill","none")
         .attr("d", function(d) { return valueline(d); })
-        .style("stroke", function(d) {return color1(d[0].State);})
+       // .style("stroke", function(d) {return color1(d[0].State);})
         .attr("clip-path", "url(#clip)");
 
+        high.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+ 
+    high.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
 
 
 
+ event1.selectAll(".line")
+        .enter().append("g")
+    .append("path")
+        .attr("class", "line")
+         .attr("fill","none")
+        .attr("stroke-width",1)
+        .attr("d", function(d) { return valueline2(d); })
+       // .attr("stroke", function(d) {return color1(d[0].State);})
+        .attr("clip-path", "url(#clip)");
+
+   event1.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height2 + ")")
+        .call(xAxis2);
+ 
+    event1.append("g")
+        .attr("class", "x brush")
+        .call(brush)
+      .selectAll("rect")
+        .attr("y", -6)
+        .attr("height", height2 + 7);
+
+});
 
 
 }
@@ -486,23 +518,17 @@ high.selectAll(".line")
 }
 /*------------------ end national unemployment ---------------------*/
 //-------all states-----------
-function allstates(element)
+function allstates(element1)
 {
-  if(element.checked)
+  if(element1.checked)
   {
    
-    var selarr1=["Alabama","Alaska","","Arizona","Arkansas","California","","Colorado","Connecticut","Delaware","","Florida","Georgia","","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts"
-,"Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma"
-,"Oregon","Pennsylvania","","","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia",,"Washington","West Virginia","Wisconsin","Wyoming"];
-for(var i=0; i<selarr1.length;i++)
-{
-selarr[i]=selarr1[i];
+    selarr=["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District of Columbia","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"];
+
 graph();
-}
-
-
  }
 }
+
 
 graph();
 var dataArray=[];
@@ -635,9 +661,9 @@ svg.append("text")
 
 //-------rise and drop functions------
 function risefunc() {
-var rise=document.getElementById('riseper').value;
+var rise=document.getElementById('rise').value;
 rise=Number(rise);
-high.selectAll(".line")
+svg.selectAll(".line")
 .attr("stroke-opacity", function (unRates) {
 var bigIncrease=false;
 for(var i=1; i<unRates.length; i++) {
@@ -654,9 +680,9 @@ return 0.1;
 }
 
 function dropfunc() {
-var drop=document.getElementById('dropper').value;
+var drop=document.getElementById('drop').value;
 drop=Number(drop);
-high.selectAll(".line")
+svg.selectAll(".line")
 .attr("stroke-opacity", function (unRates) {
 var bigDrop=false;
 for(var i=1; i<unRates.length; i++) {
