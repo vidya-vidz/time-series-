@@ -1,15 +1,1 @@
-# time-series-
-Project on time series visualization.
-<html>
-<head>
-        <title> Project on Time Series Visualization </title>
-</head>
-
-<body>
-<script language="javascrpt"  type="text/javascrpt">
-
-
-
-
-</script>
-</body>
+[![ScreenShot] https://github.com/vidya-vidz/time-series-/blob/master/drop.png
