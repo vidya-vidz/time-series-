@@ -6,3 +6,4 @@ https://github.com/vidya-vidz/time-series-/blob/master/one%20state%20with%20tool
 https://github.com/vidya-vidz/time-series-/blob/master/rise.png
 
 https://github.com/vidya-vidz/time-series-/blob/master/slider%20for%20national.png
+https://github.com/vidya-vidz/time-series-/blob/master/slider%20for%20states.png
