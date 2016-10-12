@@ -130,9 +130,9 @@ var selarr=[];
 
 var margin = {top: 30, right: 10, bottom: 100, left: 24},
 margin2 = { top: 430, right: 10, bottom: 20, left: 24 },
-    width =950 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-    height2 = 500 - margin2.top - margin2.bottom;
+    width =950- margin.left - margin.right,
+    height = 470 - margin.top - margin.bottom;
+    height2 = 470 - margin2.top - margin2.bottom;
 
 var parseDate = d3.time.format("%d-%b-%y").parse;
 var parseDate2 = d3.time.format("%B-%Y").parse;
@@ -244,7 +244,7 @@ x.domain(d3.extent(dataAll["Indiana"], function(d) { return d.date; }));
         .style("stroke", function(d) {return color1(d[0].State);})
         .attr("clip-path", "url(#clip)");
 
-
+        debugger;
 
     high.append("g")
         .attr("class", "x axis")
@@ -320,9 +320,10 @@ d3.json("usstates.json", function(error, us) {
       .data(us.features)
     .enter().append("path")
       .attr("d", path)
+      .attr("id",function(d){return "map_id"+d.id;})
     .attr("test",function(d){
     console.log(d);
-   // debugger;
+    debugger;
     })
       .on("click", clicked)
     .on("mousemove", function(d) {
@@ -374,7 +375,7 @@ d3.json("usstates.json", function(error, us) {
 function clicked(d) {
   var x, y, k;
   
-
+/*
   if (d && centered !== d) {
     var centroid = path.centroid(d);
     x = centroid[0];
@@ -387,7 +388,7 @@ function clicked(d) {
     k = 1;
     centered = null;
   }
-
+*/
   mapg.selectAll("path")
       .classed("active", centered && function(d) { return d === centered; });
 
@@ -540,7 +541,7 @@ graph();
 
 graph();
 var dataArray=[];
-
+var statenames=["","Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District of Columbia","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"];
 function graph() {
 
 d3.csv("unemplyment.csv", function(error, data) {    
@@ -591,6 +592,7 @@ d3.csv("unemplyment.csv", function(error, data) {
     return valueline(d)
     })
     .on("mouseover", function(d1) {
+      debugger;
     svg.selectAll(".line")
     .transition().duration(250)
     .attr("stroke-opacity", function(d2) {
@@ -599,6 +601,8 @@ d3.csv("unemplyment.csv", function(error, data) {
     else
     return 0.01;
     });
+    
+    
     })
     .on("mouseout", function(d) {
     svg.selectAll(".line")
@@ -621,6 +625,11 @@ d3.csv("unemplyment.csv", function(error, data) {
     return valueline(d)
     })
     .on("mouseover", function(d1) {
+      var state=statenames.indexOf(d1[0].State);
+      if(state<10)
+        state="0"+state;
+      document.getElementById("map_id"+state).style.fill="#fff";
+      debugger;
     svg.selectAll(".line")
     .transition().duration(250)
     .attr("stroke-opacity", function(d2) {
@@ -631,6 +640,10 @@ d3.csv("unemplyment.csv", function(error, data) {
     });
     })
     .on("mouseout", function(d) {
+      var state=statenames.indexOf(d[0].State);
+      if(state<10)
+        state="0"+state;
+      document.getElementById("map_id"+state).style.fill=color1(d[0].State);
     svg.selectAll(".line")
     .transition().duration(250)
     .attr("stroke-opacity", 1);
