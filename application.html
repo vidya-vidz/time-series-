@@ -89,6 +89,9 @@ stroke: #333;
 <body>
 
 <table>
+<tr><td><form action="statenyear.html">
+    <button type="submit" value="yearcompare">yearcomparision</button>
+</form>
 <tr><td>Rise in %:</td><td><input type="text" name="rise" id="rise"></td>
 <td><button class='button' onclick= "risefunc();">Rise</button></td></tr>
 <tr><td>Drop in %:</td><td><input type="text" name="drop" id="drop" ></td>
@@ -493,6 +496,7 @@ high.selectAll(".line")
  
     high.append("g")
         .attr("class", "y axis")
+        //.attr("transform", "translate(0," + height + ")")
         .call(yAxis);
 
 
